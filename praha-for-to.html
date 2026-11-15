@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Praha for to – 4–5 dager</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#eef1f0;--surf:#fff;--ink:#1d2b33;--mute:#4f5d66;--line:#d5dcda}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:700;margin:0}
+h1{font-size:1.9rem;line-height:1.15}
+header{padding:1.2rem 1rem .6rem}
+header p{margin:.5rem 0 0;max-width:60ch;color:var(--mute)}
+.notes{margin:.8rem 0 0;padding:0 0 0 1.1rem;max-width:62ch;font-size:.92rem;color:var(--mute)}
+.layout{display:grid;grid-template-columns:1fr}
+#map{height:42vh;width:100%;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+.panel{padding:0 1rem 3rem}
+.bar{display:flex;flex-wrap:wrap;gap:.4rem;margin:.8rem 0 .6rem}
+.lbl{width:100%;font-size:.85rem;font-weight:600;color:var(--mute);margin-top:.3rem}
+.chip{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font:inherit;font-size:.88rem;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #e3a008;outline-offset:2px}
+.dayinfo{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:.7rem .9rem;margin:.4rem 0 1rem}
+.dayinfo h2{margin:0 0 .2rem;font-size:1.1rem}
+.dayinfo p{margin:0;font-size:.93rem}
+h2{font-size:1.2rem;margin:1.6rem 0 .1rem}
+.area-note{margin:0 0 .6rem;font-size:.88rem;color:var(--mute)}
+.card{background:var(--surf);border-left:6px solid var(--c);border-radius:4px;padding:.7rem .9rem;margin:0 0 .6rem}
+.card h3{font-size:1.05rem}
+.card h3 a{color:var(--ink);text-decoration-color:var(--c)}
+.cat{font-size:.85rem;font-weight:600;color:var(--c)}
+.card p{margin:.3rem 0 0;font-size:.94rem}
+.how{color:var(--mute)}
+.acts{display:flex;gap:.5rem;margin-top:.5rem}
+.acts button{border:1px solid var(--line);background:var(--bg);border-radius:4px;padding:.25rem .7rem;font:inherit;font-size:.85rem;cursor:pointer}
+.acts button[aria-pressed=true]{background:var(--c);border-color:var(--c);color:#fff}
+.empty{color:var(--mute);padding:1rem 0}
+.guide{margin-top:2.2rem}
+.guide>h2{margin-top:0}
+details{background:var(--surf);border:1px solid var(--line);border-radius:6px;margin:.5rem 0;padding:.1rem .9rem}
+summary{cursor:pointer;font-weight:600;padding:.6rem 0}
+details ul{margin:0 0 .8rem;padding-left:1.1rem;font-size:.94rem}
+details li{margin:.25rem 0}
+footer{padding:0 1rem 2rem;font-size:.85rem;color:var(--mute);max-width:70ch}
+@media(min-width:900px){
+ .layout{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}
+ .panel{order:1;padding-right:1.2rem}
+ #map{order:2;height:100vh;border:0;border-left:1px solid var(--line)}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+.acts button.v1[aria-pressed=true]{background:#0f6b6b;border-color:#0f6b6b;color:#fff}
+.acts button.v2[aria-pressed=true]{background:#8c1d3f;border-color:#8c1d3f;color:#fff}
+.both{font-size:.82rem;font-weight:600;color:#2e7d32;margin-left:.3rem}
+.cat{display:flex;align-items:center}
+</style>
+</head>
+<body>
+<header>
+<h1>Praha for to – 4–5 dager</h1>
+<p>Museer, zoo, akvarium, opera og historiske bygg for to personer, gruppert i dagsklynger. Velg en dag for å se hva som hører sammen, og marker hva dere hver især er interessert i.</p>
+<ul class="notes"><li>Person 1 og Person 2 markerer hver sine ønsker. «Kopier delingslenke» tar med begge valgene, så kan dere sende lenken til hverandre.</li><li>Priser er i tsjekkiske kroner (CZK) og kommer fra nettsøk. Sjekk dem før dere drar.</li><li>Forberedelser og apper ligger først i turistguiden nederst på siden.</li></ul>
+</header>
+<div class="layout">
+<div class="panel">
+<div class="bar" id="bar"></div>
+<div id="list"></div>
+<div class="guide"><h2>Turistguide: hva dere kan forvente</h2><details open><summary>Forberedelser før avreise</summary><ul><li>Dokumenter: Begge trenger gyldig pass eller nasjonalt ID-kort (Tsjekkia er i Schengen, ingen visum). Sjekk utløpsdato, ta med europeisk helsetrygdkort (EHIC) og reiseforsikring, og lagre en digital kopi av passet.</li><li>Appen PID Lítačka: kjøper og lagrer billetter, viser rutetider og kan vise QR-koden ved kontroll. Hver av dere trenger egen billett.</li><li>Mapy.cz: tsjekkisk kartapp som ofte er bedre enn Google Maps i Tsjekkia. Last ned offline-kart over Praha før avreise.</li><li>IDOS: tsjekkisk ruteplanlegger. Google Maps og Google Translate (last ned tsjekkisk offline, bruk kamera-oversettelse på menyer).</li><li>Bolt, Uber eller Liftago for taxi. Avtal pris eller bruk appen, og ikke ta gatetaxi.</li><li>Strøm og mobil: Tsjekkia har 230 V og vanlige norske ladere fungerer normalt uten adapter. Sjekk hos mobiloperatøren din om EØS-roaming er inkludert, og ta med powerbank.</li><li>Bank: Ha et Visa/Mastercard hver og litt CZK i kontanter til markeder og små steder. Velg alltid å betale i CZK.</li><li>Pakking: gode sko for brostein og trapper, regnjakke og lag-på-lag. Vannet fra springen er trygt å drikke, så ta med flaske.</li><li>Fra flyplassen: trolleybuss 59 går fra flyplassen til Nádraží Veleslavín (metro A) og har erstattet buss 119 siden 2024. Sjekk ruten i appen. For to kan Bolt være verdt å sammenligne mot to billetter.</li></ul></details><details><summary>Bestill i forveien (for to)</summary><ul><li>Praha slott: kjøp billett på nett (hrad.cz) og ha morgenslot. Hovedrunden koster ca. 250–450 CZK per person, og kildene er uenige på grunn av nye billettnavn.</li><li>Opera, teater og konserter (Stavovské divadlo, Statsoperaen, Rudolfinum): bestill to plasser sammen, gjerne uker i forveien. Sjekk teksting.</li><li>Zoo: nettbillett er litt billigere (ca. 300 CZK mot 330 CZK per person). Sea World: sjekk hva som er åpent før dere reiser.</li><li>Restauranter på fredag og lørdag: reserver bord for to, særlig Lokál og Café Slavia.</li></ul></details><details><summary>Eksempel på kostnader for to</summary><ul><li>Inngang for to: Zoo ca. 660 CZK (600 på nett), Sea World ca. 880 CZK, Nasjonalgalleriet ca. 500 CZK, Nasjonalmuseet ca. 700 CZK.</li><li>Kollektiv: 24 timer 140 CZK eller 72 timer 340 CZK per person i appen (2026-priser).</li><li>Dagsbudsjett (kildene oppgir per person, inkludert overnatting): ca. 40–60 euro enkelt eller 80–150 euro middels. Når to deler rom, blir det litt under det doble.</li><li>Anslåtte priser: lokal øl 35–55 CZK, i turistområder 80–140 CZK. Enkel lokal middag ca. 180–250 CZK per person.</li></ul></details><details><summary>Kollektivtransport for to</summary><ul><li>Metro (A, B, C), trikk og buss bruker samme billett. Priser 2026 (app/papir): 30 min 36/39 CZK, 90 min 46/50 CZK, 24 timer 140/150 CZK, 72 timer 340/350 CZK. Hver av dere trenger egen billett.</li><li>Stemple papirbillett før bruk (gul maskin), og trykk «start» i appen. Glemmer dere det, kan det bli en bot. Petřín-banen krever egen billett (60 CZK) eller 24/72-timers kort.</li><li>Metroen stenger ved midnatt, og natt-trikk og -buss går sjeldnere frem til ca. kl. 5.</li><li>Taxi: bruk Bolt eller Uber, og del gjerne en taxi sent på kvelden.</li></ul></details><details><summary>Penger, språk og tips</summary><ul><li>Kort fungerer nesten overalt, også Apple Pay og Google Pay. Unngå vekslingskontorer i sentrum og frittstående Euronet-automater, og avslå betaling i norske kroner.</li><li>Engelsk snakkes bredt i turistområder, men lokale puber kan ha kun tsjekkisk meny. Nyttige ord: děkuji (takk), prosím, pivo.</li><li>Drikkepenger: avrund opp eller ca. 10 % ved god service.</li></ul></details><details><summary>Mat, drikke og suvenirer</summary><ul><li>Svíčková, vepřo-knedlo-zelo, smažený sýr og chlebíčky. Trdelník er mer turistmat enn tradisjon.</li><li>Øl: Pilsner Urquell, Budvar og Staropramen. Becherovka er en lokal urtelikør.</li><li>Suvenirer: bohemsk krystall og glass, granatsmykker, marionetter og trelekeøy. Havelské tržiště og butikker utenfor sentrum er bedre for ekte håndverk enn Kongeveien.</li></ul></details><details><summary>Fallgruver</summary><ul><li>Restauranter rundt Karlsbroen og Gamlebytorget tar ofte det dobbelte. Gå 5 minutter bort fra torget.</li><li>Lommetyver på Karlsbroen, i trikker og på Gamlebytorget. Hold telefon og lommebok foran.</li><li>Ikke bytt penger på gaten, og unngå vekslingskontorer med dårlig kurs.</li></ul></details></div>
+</div>
+<div id="map" role="application" aria-label="Kart over severdigheter"></div>
+</div>
+<footer>Kartdata © OpenStreetMap-bidragsytere. Valgene lagres i nettleseren, eller i delingslenken. Priser og åpningstider kommer fra nettsøk i 2026 og kan endre seg.</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var KEY="praha2-",CENTER=[50.0875,14.4210];
+var A={
+"Staré Město (gamlebyen)":"Den historiske kjernen. Alt her ligger innen ca. 15 minutters gange fra Staroměstská.",
+"Pražský hrad og Malá Strana":"Slottskomplekset, torgene under det og utsikten fra høydene vest for elven.",
+"Nové Město":"Teatre, kafé, torg og museer rundt Národní og Václavské náměstí.",
+"Vyšehrad":"Festning på en klippe sør i byen, som en forlengelse av elveturen fra Dancing House.",
+"Holešovice, Letná og Troja":"Dyr, akvarium og to store museer nord for Vltava.",
+"Dagstur fra Praha":"Valgfri heldagstur med tog."
+};
+var D=[{s:"Dag 1",t:"Dag 1: Gamlebyen og kveld i teater",d:"Alt ligger innen ca. 15 minutters gange. Start på Gamlebytorget med uret, gå via Havelské tržiště og shoppinggatene til Obecní dům og Mucha-museet. Bestill billetter til Stavovské divadlo, Rudolfinum eller marionetteateret i forveien, og reserver bord til middag."},{s:"Dag 2",t:"Dag 2: Karlsbroen, Malá Strana og slottet",d:"Vær ved slottet når interiørene åpner kl. 9, så slipper dere køen. Gå først over Karlsbroen, via Kampa og Lennon-muren og Malostranské náměstí, og opp til slottet. Fortsett til Strahov og Petřín og ta banen ned. En full dag med mye trapper."},{s:"Dag 3",t:"Dag 3: Nové Město og Vyšehrad",d:"Start ved Václavské náměstí og Nasjonalmuseet, ta Café Louvre og Nasjonalteatret, og følg elven sør til Dancing House og Náplavka. Gå videre til Vyšehrad om dere har krefter. Statsoperaen er en god kveldsforestilling, og U Fleků ligger nær Národní."},{s:"Dag 4",t:"Dag 4: Holešovice og Letná",d:"Kunst, teknikk og akvarium nord for Vltava. Veletržní palác, Det tekniske museet og Letná-parken ligger nær hverandre, mens Sea World ligger ved Výstaviště. Velg to eller tre av dem."},{s:"Dag 5",t:"Dag 5: Zoo Praha",d:"Zoo tar 4–6 timer og ligger i Troja nord i byen. Om vinteren stenger parken 16:00, så kom tidlig. Resten av dagen kan dere bruke i gamlebyen, eller dere kan bytte zoo mot Kutná Hora."},{s:"Dagstur",t:"Valgfritt: dagstur til Kutná Hora",d:"Tog fra Praha hlavní nádraží tar ca. 1 time hver vei. Beinkirken og katedralen tar ca. en halv dag, så dette passer som erstatning for dag 5."}];
+var P=[
+{g:1,a:"Pražský hrad og Malá Strana",c:"Historie og arkitektur",n:"Pražský hrad (Praha slott)",la:50.0909,lo:14.4005,d:"Et av verdens største sammenhengende slottskomplekser, med St. Vitus-katedralen, Gamle kongepalass og Gullmakergaten. Området er gratis å gå i. Billett til interiørene koster ca. 250–450 CZK per person (kildene er uenige, sjekk hrad.cz), og interiørene er åpne 9–16 om vinteren, så kom tidlig.",t:"Trikk 22/23 til Pražský hrad, eller metro A Malostranská og gå opp.",u:"https://www.hrad.cz/en"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Historie og arkitektur",n:"Strahov-klosteret og biblioteket",la:50.0865,lo:14.3880,d:"Barokke bibliotekssaler med himmelmalerier. Ofte kan du bare se inn fra døråpningen, så sjekk hva som er åpent.",t:"Trikk 22/23 til Pohořelec.",u:"https://www.strahovskyklaster.cz"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Historie og arkitektur",n:"Gamlebyen og Det astronomiske uret",la:50.0875,lo:14.4213,d:"Torget med Det astronomiske uret fra 1410, Týn-kirken og Rådhuset. Uret slår hver hele time.",t:"Metro A Staroměstská.",u:"https://en.wikipedia.org/wiki/Prague_Astronomical_Clock"},
+{g:1,a:"Staré Město (gamlebyen)",c:"Historie og arkitektur",n:"Karlsbroen",la:50.0865,lo:14.4114,d:"Gotisk steinbro fra 1300-tallet med barokke statuer. Best tidlig om morgenen, før turistene kommer.",t:"Metro A Staroměstská, eller trikk til Karlovy lázně.",u:"https://en.wikipedia.org/wiki/Charles_Bridge"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Historie og arkitektur",n:"Obecní dům (Municipal House)",la:50.0875,lo:14.4283,d:"Prags mest overdådige jugendbygg fra 1912, med kafé og konserter i Smetana-salen.",t:"Metro B Náměstí Republiky.",u:"https://www.obecnidum.cz/en/"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Opera og konsert",n:"Rudolfinum",la:50.0903,lo:14.4150,d:"Neorenessansehuset der Tsjekkisk filharmoni spiller i Dvořák-salen.",t:"Metro A Staroměstská.",u:"https://www.rudolfinum.cz/en"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Opera og konsert",n:"Stavovské divadlo (Estates Theatre)",la:50.0864,lo:14.4237,d:"Teatret der Mozarts Don Giovanni ble urfremført i 1787. Opera, ballett og teater, så sjekk teksting per forestilling.",t:"Metro A/B Můstek, ca. 5 min å gå.",u:"https://www.narodni-divadlo.cz/en"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Museum",n:"Mucha-museet",la:50.0831,lo:14.4252,d:"Alfons Muchas jugendplakater og malerier. Kompakt, og lett å legge inn mellom to andre stopp.",t:"Metro A/B Můstek.",u:"https://www.mucha.cz/en"},
+{g:2,a:"Nové Město",c:"Teater",n:"Národní divadlo (Nasjonalteatret)",la:50.0807,lo:14.4132,d:"Nasjonalscenen ved Vltava, åpnet 1883, med opera, ballett og drama. Nová scéna har vært planlagt rekonstruert, så sjekk hvilke scener som spiller.",t:"Trikk 9/18/22 til Národní divadlo.",u:"https://www.narodni-divadlo.cz/en"},
+{g:2,a:"Nové Město",c:"Mat og drikke",n:"Café Louvre",la:50.0817,lo:14.4194,d:"Kaféhus fra 1902 med biljardsal i andre etasje. Kafka og Einstein skal ha vært gjester.",t:"Metro B Národní třída.",u:"https://www.cafelouvre.cz"},
+{g:2,a:"Nové Město",c:"Museum",n:"Národní muzeum (Nasjonalmuseet)",la:50.0791,lo:14.4306,d:"Hovedbygget på toppen av Václavské náměstí, restaurert og gjenåpnet i 2018. Naturhistorie, mineraler og historie i et neorenessansebygg.",t:"Metro A/C Muzeum.",u:"https://www.nm.cz/en"},
+{g:2,a:"Nové Město",c:"Opera og konsert",n:"Státní opera (Statsoperaen)",la:50.0833,lo:14.4344,d:"Neorokokko-operahus fra 1888 med klassisk operarepertoar.",t:"Metro A/C Muzeum, ca. 5 min å gå.",u:"https://www.narodni-divadlo.cz/en"},
+{g:2,a:"Nové Město",c:"Historie og arkitektur",n:"Dancing House (Tančící dům)",la:50.0755,lo:14.4143,d:"Frank Gehrys og Vlado Milunićs dekonstruktivistiske bygg fra 1996. Se det utenfra, eller ta utsikten fra terrassen øverst.",t:"Trikk 17 til Jiráskovo náměstí.",u:"https://en.wikipedia.org/wiki/Dancing_House"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Museum",n:"Nasjonalgalleriet i Veletržní palác",la:50.1031,lo:14.4318,d:"Moderne og samtidskunst i et funksjonalistisk messepalass fra 1928. Billett ca. 250 CZK.",t:"Metro C Vltavská, eller trikk 6/17 til Veletržní palác.",u:"https://www.ngprague.cz/en"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Museum",n:"Det nasjonale tekniske museet",la:50.0972,lo:14.4247,d:"Fly, biler og tog i en enorm transporthall, pluss astronomi og arkitektur.",t:"Trikk til Letenské náměstí.",u:"https://www.ntm.cz/en"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Dyr og akvarium",n:"Sea World (Mořský svět)",la:50.1086,lo:14.4328,d:"Tsjekkias største havakvarium, med over 360 arter og haibasseng. Åpent 8:30–18 på hverdager og 9–19 i helgene, voksen 440 CZK. Deler har vært stengt for modernisering, med nytt «Shark Reef» planlagt i 2026, så sjekk hva som er åpent.",t:"Metro C Nádraží Holešovice, deretter trikk til Výstaviště Holešovice (sjekk linje i appen).",u:"https://www.morsky-svet.cz"},
+{g:4,a:"Holešovice, Letná og Troja",c:"Dyr og akvarium",n:"Zoo Praha",la:50.1170,lo:14.4065,d:"Regnes som en av verdens beste zoologiske hager, med 60 hektar og over 150 anlegg. Åpent hver dag fra 9:00, og fra november til februar stenger parken 16:00. Voksen 330 CZK, 300 CZK på nett.",t:"Metro C Nádraží Holešovice, deretter buss 112 til Zoo Praha.",u:"https://www.zoopraha.cz/en"},
+{g:2,a:"Vyšehrad",c:"Historie og arkitektur",n:"Vyšehrad-festningen",la:50.0640,lo:14.4180,d:"Festning på en klippe over Vltava, med Peter og Paul-basilikaen og kirkegården der Dvořák og Smetana er gravlagt.",t:"Metro C Vyšehrad.",u:"https://www.praha-vysehrad.cz"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Torg og shopping",n:"Havelské tržiště",la:50.0834,lo:14.4222,d:"Det gamle utendørsmarkedet i gamlebyen, åpent hver dag. Frukt, krydder, håndverk og suvenirer, men prisene er turistpriser.",t:"Metro A/B Můstek, 3 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=Havelsk%C3%A9%20tr%C5%BEi%C5%A1t%C4%9B%20Praha"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Torg og shopping",n:"Na Příkopě og Celetná",la:50.0868,lo:14.4283,d:"Prags viktigste handlegater, med kjeder og kjøpesenteret Palladium. Celetná er best for suvenirer, men mange butikker selger de samme tingene.",t:"Metro B Náměstí Republiky eller A/B Můstek.",u:"https://www.google.com/maps/search/?api=1&query=Na%20P%C5%99%C3%ADkop%C4%9B%20Praha"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Utsikt og park",n:"Kampa og Lennon-muren",la:50.0855,lo:14.4093,d:"Parkøy under Karlsbroen og den fargerike Lennon-muren. Fin plass til en rolig pause.",t:"Til fots fra Karlsbroen, ca. 5 min.",u:"https://www.google.com/maps/search/?api=1&query=Lennon%20Wall%20Praha"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Historie og arkitektur",n:"Malostranské náměstí og St. Nicholas-kirken",la:50.088,lo:14.4045,d:"Barokktorget i Malá Strana med den store St. Nicholas-kirken, et av byens vakreste interiører.",t:"Trikk 12/20/22 til Malostranské náměstí.",u:"https://www.google.com/maps/search/?api=1&query=St.%20Nicholas%20Church%20Mal%C3%A1%20Strana"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Utsikt og park",n:"Petřín-høyden og utsiktstårnet",la:50.0834,lo:14.3955,d:"Park og utkikkstårn med utsikt over byen. Standseilbanen er dekket av 24/72-timers kort, ellers koster en egen billett 60 CZK.",t:"Trikk 12/20/22 til Újezd, deretter standseilbane.",u:"https://www.google.com/maps/search/?api=1&query=Pet%C5%99%C3%ADn%20lookout%20tower"},
+{g:2,a:"Nové Město",c:"Torg og shopping",n:"Václavské náměstí",la:50.081,lo:14.427,d:"Det store bulevardtorget med Nasjonalmuseet i toppen, fullt av butikker og kafeer. I adventstiden er det juletorg her og på Gamlebytorget.",t:"Metro A/C Muzeum.",u:"https://en.wikipedia.org/wiki/Wenceslas_Square"},
+{g:2,a:"Nové Město",c:"Mat og drikke",n:"U Fleků",la:50.0802,lo:14.4162,d:"Bryggeri og ølhall fra 1499 med eget mørkt øl. Turistrettet og dyrere enn vanlige puber, men historisk.",t:"Metro B Národní třída, ca. 5 min å gå.",u:"https://www.ufleku.cz"},
+{g:2,a:"Nové Město",c:"Utsikt og park",n:"Náplavka",la:50.069,lo:14.413,d:"Elvepromenaden langs Vltava med kafeer og barer i buene. På lørdager er det marked med mat og håndverk.",t:"Trikk 17 til Jiráskovo náměstí, eller til fots fra Dancing House.",u:"https://www.google.com/maps/search/?api=1&query=N%C3%A1plavka%20Praha"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Utsikt og park",n:"Letná-parken",la:50.0958,lo:14.4264,d:"Park med utsikt over Vltava og gamlebyen, og ølhage. Ligger nær Veletržní palác og Det tekniske museet.",t:"Trikk til Letenské náměstí.",u:"https://www.google.com/maps/search/?api=1&query=Letn%C3%A1%20park%20Praha"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Mat og drikke",n:"Lokál Dlouhá",la:50.0905,lo:14.4263,d:"Folkelig ølhall med tsjekkisk husmannskost og tankøl. Populær, så bestill bord for to på kvelden.",t:"Metro B Náměstí Republiky, 5 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=Lok%C3%A1l%20Dlouh%C3%A1%20Praha"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Teater",n:"Nasjonalt marionetteater",la:50.0885,lo:14.4177,d:"Marionetteater i en tsjekkisk tradisjon. Passer for to uten språkkunnskaper, siden dukkene bærer forestillingen.",t:"Metro A Staroměstská, 5 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=National%20Marionette%20Theatre%20Praha"},
+{g:2,a:"Nové Město",c:"Mat og drikke",n:"Café Slavia",la:50.0807,lo:14.4139,d:"Historisk kafé ved elven, rett overfor Nasjonalteatret, med utsikt mot slottet.",t:"Trikk 9/18/22 til Národní divadlo.",u:"https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Slavia%20Praha"},
+{g:5,a:"Dagstur fra Praha",c:"Historie og arkitektur",n:"Kutná Hora og Sedlec-beinhuset",la:49.961,lo:15.2888,d:"UNESCO-verdensarv: beinkirken i Sedlec, dekorert med titusenvis av skjeletter, og den gotiske St. Barbara-katedralen. Heldagstur.",t:"Tog fra Praha hlavní nádraží, ca. 1 time. Sjekk avgang i IDOS.",u:"https://www.ossuary.eu"}
+];
+
+var C={"Opera og konsert":"#8c1d3f","Teater":"#5b3a91","Museum":"#0f6b6b","Dyr og akvarium":"#2e7d32","Historie og arkitektur":"#a0701a","Torg og shopping":"#a85a0f","Utsikt og park":"#3d7a99","Mat og drikke":"#5c6670"};
+var S={a:new Set(),b:new Set()},cat=null,who=null,day=null,msg="";
+try{["a","b"].forEach(function(k){S[k]=new Set(JSON.parse(localStorage.getItem(KEY+k)||"[]"))})}catch(e){}
+function save(){try{["a","b"].forEach(function(k){localStorage.setItem(KEY+k,JSON.stringify(Array.from(S[k])))})}catch(e){}}
+function loadHash(){var h=(location.hash||"").replace("#","");if(!h)return;h.split("&").forEach(function(p){var kv=p.split("=");if((kv[0]==="a"||kv[0]==="b")&&/^[0-9.]*$/.test(kv[1]||"")){S[kv[0]]=new Set(kv[1]?kv[1].split(".").map(Number).filter(function(n){return n>=0&&n<P.length}):[])}});save()}
+function link(){return location.href.split("#")[0]+"#a="+Array.from(S.a).join(".")+"&b="+Array.from(S.b).join(".")}
+loadHash();
+var map=L.map("map").setView(CENTER,12);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"© OpenStreetMap"}).addTo(map);
+var mk=P.map(function(p){
+ return L.circleMarker([p.la,p.lo],{radius:9,color:"#fff",weight:2,fillColor:C[p.c],fillOpacity:1})
+  .bindPopup("<b>"+p.n+"</b><br>"+p.c+"<br><a href='"+p.u+"' target='_blank' rel='noopener'>Nettside</a>");
+});
+function visible(i){return (!cat||P[i].c===cat)&&(who===null||(who==="ab"?(S.a.has(i)&&S.b.has(i)):S[who].has(i)))&&(day===null||P[i].g===day)}
+function render(){
+ var h="<div class='lbl'>Dag</div><button class='chip' data-day='' aria-pressed='"+(day===null)+"'>Alle</button>";
+ D.forEach(function(d,k){h+="<button class='chip' data-day='"+k+"' aria-pressed='"+(day===k)+"'>"+d.s+"</button>"});
+ h+="<div class='lbl'>Kategori</div><button class='chip' data-cat='' aria-pressed='"+(!cat)+"'>Alle</button>";
+ Object.keys(C).forEach(function(k){h+="<button class='chip' data-cat='"+k+"' aria-pressed='"+(cat===k)+"'>"+k+"</button>"});
+ h+="<div class='lbl'>Valg</div><button class='chip' data-who='' aria-pressed='"+(who===null)+"'>Alle</button><button class='chip' data-who='ab' aria-pressed='"+(who==="ab")+"'>Begge er interessert</button><button class='chip' data-who='a' aria-pressed='"+(who==="a")+"'>Person 1 ("+S.a.size+")</button><button class='chip' data-who='b' aria-pressed='"+(who==="b")+"'>Person 2 ("+S.b.size+")</button><button class='chip' data-share='1'>Kopier delingslenke</button>"+(msg?"<span class='both'>"+msg+"</span>":"");
+ document.getElementById("bar").innerHTML=h;
+ var info=day!==null?"<div class='dayinfo'><h2>"+D[day].t+"</h2><p>"+D[day].d+"</p></div>":"";
+ var out="",any=false,pts=[];
+ Object.keys(A).forEach(function(area){
+  var cards="";
+  P.forEach(function(p,i){
+   if(p.a!==area)return;
+   if(!visible(i)){map.removeLayer(mk[i]);return}
+   mk[i].addTo(map);pts.push([p.la,p.lo]);any=true;
+   var a=S.a.has(i),b=S.b.has(i);
+   cards+="<div class='card' style='--c:"+C[p.c]+"'><div class='cat'>"+p.c+(a&&b?"<span class='both'>Begge er interessert</span>":"")+"</div><h3><a href='"+p.u+"' target='_blank' rel='noopener'>"+p.n+"</a></h3><p>"+p.d+"</p><p class='how'>Slik kommer du deg dit: "+p.t+"</p><div class='acts'><button data-show='"+i+"'>Vis på kart</button><button class='v1' data-pick='a:"+i+"' aria-pressed='"+a+"'>Person 1</button><button class='v2' data-pick='b:"+i+"' aria-pressed='"+b+"'>Person 2</button></div></div>";
+  });
+  if(cards)out+="<h2>"+area+"</h2><p class='area-note'>"+A[area]+"</p>"+cards;
+ });
+ document.getElementById("list").innerHTML=info+(any?out:"<p class='empty'>Ingen steder matcher filteret ennå.</p>");
+ if(pts.length)map.fitBounds(pts,{padding:[30,30],maxZoom:14});
+}
+document.addEventListener("click",function(e){
+ var b=e.target.closest("button");if(!b)return;
+ if(b.hasAttribute("data-day")){var v=b.getAttribute("data-day");day=v===""?null:+v;render()}
+ else if(b.hasAttribute("data-cat")){cat=b.getAttribute("data-cat")||null;render()}
+ else if(b.hasAttribute("data-who")){who=b.getAttribute("data-who")||null;render()}
+ else if(b.hasAttribute("data-share")){var l=link();msg="";try{navigator.clipboard.writeText(l).then(function(){msg="Lenke kopiert";render()},function(){location.hash=l.split("#")[1];msg="Lenken ligger i adressefeltet";render()})}catch(e){location.hash=l.split("#")[1];msg="Lenken ligger i adressefeltet";render()}}
+ else if(b.hasAttribute("data-pick")){var kv=b.getAttribute("data-pick").split(":"),s=S[kv[0]],i=+kv[1];s.has(i)?s.delete(i):s.add(i);save();render()}
+ else if(b.hasAttribute("data-show")){var j=+b.getAttribute("data-show");map.setView([P[j].la,P[j].lo],15);mk[j].openPopup();window.scrollTo({top:0,behavior:"smooth"})}
+});
+render();
+setTimeout(function(){map.invalidateSize()},200);
+
+</script>
+</body>
+</html>

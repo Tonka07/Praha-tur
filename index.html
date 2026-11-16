@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Praha for to – 4–5 dager</title>
+<style>
+:root{--bg:#eef1f0;--surf:#fff;--ink:#1d2b33;--mute:#4f5d66;--line:#d5dcda}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:700;margin:0}
+h1{font-size:1.9rem;line-height:1.15}
+header{padding:1.2rem 1rem .6rem}
+header p{margin:.5rem 0 0;max-width:60ch;color:var(--mute)}
+.notes{margin:.8rem 0 0;padding:0 0 0 1.1rem;max-width:62ch;font-size:.92rem;color:var(--mute)}
+.layout{display:grid;grid-template-columns:1fr}
+#map{height:42vh;width:100%;position:sticky;top:0;z-index:5;border-bottom:1px solid var(--line)}
+.panel{padding:0 1rem 3rem}
+.bar{display:flex;flex-wrap:wrap;gap:.4rem;margin:.8rem 0 .6rem}
+.lbl{width:100%;font-size:.85rem;font-weight:600;color:var(--mute);margin-top:.3rem}
+.chip{border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:999px;padding:.3rem .8rem;font:inherit;font-size:.88rem;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid #e3a008;outline-offset:2px}
+.dayinfo{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:.7rem .9rem;margin:.4rem 0 1rem}
+.dayinfo h2{margin:0 0 .2rem;font-size:1.1rem}
+.dayinfo p{margin:0;font-size:.93rem}
+h2{font-size:1.2rem;margin:1.6rem 0 .1rem}
+.area-note{margin:0 0 .6rem;font-size:.88rem;color:var(--mute)}
+.card{background:var(--surf);border-left:6px solid var(--c);border-radius:4px;padding:.7rem .9rem;margin:0 0 .6rem}
+.card h3{font-size:1.05rem}
+.card h3 a{color:var(--ink);text-decoration-color:var(--c)}
+.cat{font-size:.85rem;font-weight:600;color:var(--c)}
+.card p{margin:.3rem 0 0;font-size:.94rem}
+.how{color:var(--mute)}
+.acts{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.5rem}
+.acts button{border:1px solid var(--line);background:var(--bg);border-radius:4px;padding:.25rem .7rem;font:inherit;font-size:.85rem;cursor:pointer}
+.acts button[aria-pressed=true]{background:var(--c);border-color:var(--c);color:#fff}
+.acts a.g3d{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:4px;padding:.25rem .7rem;font-size:.85rem;text-decoration:none}
+.empty{color:var(--mute);padding:1rem 0}
+.guide{margin-top:2.2rem}
+.guide>h2{margin-top:0}
+details{background:var(--surf);border:1px solid var(--line);border-radius:6px;margin:.5rem 0;padding:.1rem .9rem}
+summary{cursor:pointer;font-weight:600;padding:.6rem 0}
+details ul{margin:0 0 .8rem;padding-left:1.1rem;font-size:.94rem}
+details li{margin:.25rem 0}
+footer{padding:0 1rem 2rem;font-size:.85rem;color:var(--mute);max-width:70ch}
+@media(min-width:900px){
+ .layout{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}
+ .panel{order:1;padding-right:1.2rem}
+ #map{order:2;height:100vh;border:0;border-left:1px solid var(--line)}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+
+.acts button.v1[aria-pressed=true]{background:#0f6b6b;border-color:#0f6b6b;color:#fff}
+.acts button.v2[aria-pressed=true]{background:#8c1d3f;border-color:#8c1d3f;color:#fff}
+.both{font-size:.82rem;font-weight:600;color:#2e7d32;margin-left:.3rem}
+.cat{display:flex;align-items:center}
+
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+
+.leaflet-tile::selection {
+	background: transparent;
+}
+
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+
+
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	display: inline-block;
+	position: absolute;
+	}
+
+
+
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; 
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; 
+	pointer-events: auto;
+	}
+
+
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+
+.leaflet-default-icon-path {
+	}
+
+
+
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+
+
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+
+
+@media print {
+	
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+#map{background:var(--line)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip,.leaflet-tooltip{background:#fff;color:#1d2b33}
+.share{width:100%;display:flex;flex-wrap:wrap;gap:.4rem;align-items:center}
+.share input{flex:1 1 12rem;min-width:0;border:1px solid var(--line);background:var(--surf);color:var(--ink);border-radius:4px;padding:.3rem .5rem;font:inherit;font-size:.85rem}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#12181c;--surf:#1b2328;--ink:#e8eef0;--mute:#a7b4bb;--line:#2f3b42}
+:root:not([data-theme="light"]) .cat{color:color-mix(in srgb,var(--c) 55%,#fff)}}
+:root[data-theme="dark"]{--bg:#12181c;--surf:#1b2328;--ink:#e8eef0;--mute:#a7b4bb;--line:#2f3b42}
+:root[data-theme="dark"] .cat{color:color-mix(in srgb,var(--c) 55%,#fff)}
+</style>
+</head>
+<body>
+<header>
+<h1>Praha for to – 4–5 dager</h1>
+<p>Museer, zoo, akvarium, opera, historiske bygg og bryggerier for Tony og Dimitar, gruppert i dagsklynger. Velg en dag for å se hva som hører sammen, og marker hva dere hver især er interessert i.</p>
+<ul class="notes"><li>Tony og Dimitar markerer hver sine ønsker. Delingskoden nederst i filtrene tar med begge valgene, så kan dere lime den inn hos hverandre.</li><li>Priser er i tsjekkiske kroner (CZK) og kommer fra nettsøk. Sjekk dem før dere drar.</li><li>Forberedelser og apper ligger først i turistguiden nederst på siden.</li></ul>
+</header>
+<div class="layout">
+<div class="panel">
+<div class="bar" id="bar"></div>
+<div id="list"></div>
+<div class="guide"><h2>Turistguide: hva dere kan forvente</h2><details open><summary>Forberedelser før avreise</summary><ul><li>Dokumenter: Begge trenger gyldig pass eller nasjonalt ID-kort (Tsjekkia er i Schengen, ingen visum). Sjekk utløpsdato, ta med europeisk helsetrygdkort (EHIC) og reiseforsikring, og lagre en digital kopi av passet.</li><li>Appen PID Lítačka: kjøper og lagrer billetter, viser rutetider og kan vise QR-koden ved kontroll. Hver av dere trenger egen billett.</li><li>Mapy.cz: tsjekkisk kartapp som ofte er bedre enn Google Maps i Tsjekkia. Last ned offline-kart over Praha før avreise.</li><li>IDOS: tsjekkisk ruteplanlegger. Google Maps og Google Translate (last ned tsjekkisk offline, bruk kamera-oversettelse på menyer).</li><li>Bolt, Uber eller Liftago for taxi. Avtal pris eller bruk appen, og ikke ta gatetaxi.</li><li>Strøm og mobil: Tsjekkia har 230 V og vanlige norske ladere fungerer normalt uten adapter. Sjekk hos mobiloperatøren din om EØS-roaming er inkludert, og ta med powerbank.</li><li>Bank: Ha et Visa/Mastercard hver og litt CZK i kontanter til markeder og små steder. Velg alltid å betale i CZK.</li><li>Pakking: gode sko for brostein og trapper, regnjakke og lag-på-lag. Vannet fra springen er trygt å drikke, så ta med flaske.</li><li>Fra flyplassen: trolleybuss 59 går fra flyplassen til Nádraží Veleslavín (metro A) og har erstattet buss 119 siden 2024. Sjekk ruten i appen. For to kan Bolt være verdt å sammenligne mot to billetter.</li></ul></details><details><summary>Bestill i forveien (for to)</summary><ul><li>Praha slott: kjøp billett på nett (hrad.cz) og ha morgenslot. Hovedrunden koster ca. 250–450 CZK per person, og kildene er uenige på grunn av nye billettnavn.</li><li>Opera, teater og konserter (Stavovské divadlo, Statsoperaen, Rudolfinum): bestill to plasser sammen, gjerne uker i forveien. Sjekk teksting.</li><li>Zoo: nettbillett er litt billigere (ca. 300 CZK mot 330 CZK per person). Sea World: sjekk hva som er åpent før dere reiser.</li><li>Restauranter på fredag og lørdag: reserver bord for to, særlig Lokál og Café Slavia.</li></ul></details><details><summary>Eksempel på kostnader for to</summary><ul><li>Inngang for to: Zoo ca. 660 CZK (600 på nett), Sea World ca. 880 CZK, Nasjonalgalleriet ca. 500 CZK, Nasjonalmuseet ca. 700 CZK.</li><li>Kollektiv: 24 timer 140 CZK eller 72 timer 340 CZK per person i appen (2026-priser).</li><li>Dagsbudsjett (kildene oppgir per person, inkludert overnatting): ca. 40–60 euro enkelt eller 80–150 euro middels. Når to deler rom, blir det litt under det doble.</li><li>Anslåtte priser: lokal øl 35–55 CZK, i turistområder 80–140 CZK. Enkel lokal middag ca. 180–250 CZK per person.</li></ul></details><details><summary>Kollektivtransport for to</summary><ul><li>Metro (A, B, C), trikk og buss bruker samme billett. Priser 2026 (app/papir): 30 min 36/39 CZK, 90 min 46/50 CZK, 24 timer 140/150 CZK, 72 timer 340/350 CZK. Hver av dere trenger egen billett.</li><li>Stemple papirbillett før bruk (gul maskin), og trykk «start» i appen. Glemmer dere det, kan det bli en bot. Petřín-banen krever egen billett (60 CZK) eller 24/72-timers kort.</li><li>Metroen stenger ved midnatt, og natt-trikk og -buss går sjeldnere frem til ca. kl. 5.</li><li>Ruteplanlegging: <a href="https://idos.cz/en/" target="_blank" rel="noopener">IDOS</a> viser avganger og linjer i sanntid. Hvert sted på siden har også en lenke til kollektivrute i Google Maps.</li><li>Taxi: bruk Bolt eller Uber, og del gjerne en taxi sent på kvelden.</li></ul></details><details><summary>Penger, språk og tips</summary><ul><li>Kort fungerer nesten overalt, også Apple Pay og Google Pay. Unngå vekslingskontorer i sentrum og frittstående Euronet-automater, og avslå betaling i norske kroner.</li><li>Engelsk snakkes bredt i turistområder, men lokale puber kan ha kun tsjekkisk meny. Nyttige ord: děkuji (takk), prosím, pivo.</li><li>Drikkepenger: avrund opp eller ca. 10 % ved god service.</li></ul></details><details><summary>Mat, drikke og suvenirer</summary><ul><li>Svíčková, vepřo-knedlo-zelo, smažený sýr og chlebíčky. Trdelník er mer turistmat enn tradisjon.</li><li>Øl: Pilsner Urquell, Budvar og Staropramen. Becherovka er en lokal urtelikør, og slivovice er et plommebrennevin. Se «Øl og smaking» for bryggerier og ølsmaking.</li><li>Suvenirer: bohemsk krystall og glass, granatsmykker, marionetter og trelekeøy. Havelské tržiště og butikker utenfor sentrum er bedre for ekte håndverk enn Kongeveien.</li></ul></details><details><summary>Fallgruver</summary><ul><li>Restauranter rundt Karlsbroen og Gamlebytorget tar ofte det dobbelte. Gå 5 minutter bort fra torget.</li><li>Lommetyver på Karlsbroen, i trikker og på Gamlebytorget. Hold telefon og lommebok foran.</li><li>Ikke bytt penger på gaten, og unngå vekslingskontorer med dårlig kurs.</li></ul></details></div>
+</div>
+<div id="map" role="application" aria-label="Kart over severdigheter"></div>
+</div>
+<footer>Kartet bruker OpenStreetMap og Esri-satellittbilder og krever internett. Valgene lagres i nettleseren, eller i delingskoden. Priser og åpningstider kommer fra nettsøk i 2026 og kan endre seg. Reisetidene er anslag fra Můstek i sentrum, så sjekk sanntid i PID Lítačka, IDOS eller Google Maps.</footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+var KEY="praha2-",CENTER=[50.0875,14.4210];
+var A={
+"Staré Město (gamlebyen)":"Den historiske kjernen. Alt her ligger innen ca. 15 minutters gange fra Staroměstská.",
+"Pražský hrad og Malá Strana":"Slottskomplekset, torgene under det og utsikten fra høydene vest for elven.",
+"Nové Město":"Teatre, kafé, torg og museer rundt Národní og Václavské náměstí.",
+"Vyšehrad":"Festning på en klippe sør i byen, som en forlengelse av elveturen fra Dancing House.",
+"Holešovice, Letná og Troja":"Dyr, akvarium og to store museer nord for Vltava.",
+"Øl og smaking":"Klosterbryggerier, et stort bryggeri og et mikrobryggeri for dere som vil smake lokal øl. Velg én eller to per dag."
+};
+var D=[{s:"Dag 1",t:"Dag 1: Gamlebyen og kveld i teater",d:"Alt ligger innen ca. 15 minutters gange. Start på Gamlebytorget med uret, gå via Havelské tržiště og shoppinggatene til Obecní dům og Mucha-museet. Bestill billetter til Stavovské divadlo, Rudolfinum eller marionetteateret i forveien, og reserver bord til middag. Kommunismemuseet (Náměstí Republiky) og Tortur-museet (Celetná) ligger også i gamlebyen, så de passer inn her."},{s:"Dag 2",t:"Dag 2: Karlsbroen, Malá Strana og slottet",d:"Vær ved slottet når interiørene åpner kl. 9, så slipper dere køen. Gå først over Karlsbroen, via Kampa og Lennon-muren og Malostranské náměstí, og opp til slottet. Fortsett til Strahov og Petřín og ta banen ned. Kafka-museet ligger ved Karlsbroen, og på Petřín finner dere speillabyrinten og Štefánik-observatoriet ved siden av tårnet. Strahov-bryggeriet passer som avslutning. Det er en full dag med mye trapper, så velg ut noe."},{s:"Dag 3",t:"Dag 3: Nové Město og Vyšehrad",d:"Start ved Václavské náměstí og Nasjonalmuseet, ta Café Louvre og Nasjonalteatret, og følg elven sør til Dancing House og Náplavka. Gå videre til Vyšehrad om dere har krefter. Statsoperaen er en god kveldsforestilling, og U Fleků ligger nær Národní. Til øl: Pivovarský dům ligger ved Karlovo náměstí, og Staropramen-bryggeriet ved metro Anděl."},{s:"Dag 4",t:"Dag 4: Holešovice og Letná",d:"Kunst, teknikk og akvarium nord for Vltava. Veletržní palác, Det tekniske museet og Letná-parken ligger nær hverandre, mens Sea World ligger ved Výstaviště. Velg to eller tre av dem."},{s:"Dag 5",t:"Dag 5: Zoo Praha",d:"Zoo tar 4–6 timer og ligger i Troja nord i byen. Om vinteren stenger parken 16:00, så kom tidlig. Resten av dagen kan dere bruke i gamlebyen."}];
+var P=[
+{g:1,a:"Pražský hrad og Malá Strana",c:"Historie og arkitektur",n:"Pražský hrad (Praha slott)",la:50.0909,lo:14.4005,d:"Et av verdens største sammenhengende slottskomplekser, med St. Vitus-katedralen, Gamle kongepalass og Gullmakergaten. Området er gratis å gå i. Billett til interiørene koster ca. 250–450 CZK per person (kildene er uenige, sjekk hrad.cz), og interiørene er åpne 9–16 om vinteren, så kom tidlig.",t:"Trikk 22/23 til Pražský hrad, eller metro A Malostranská og gå opp.",u:"https://www.hrad.cz/en"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Historie og arkitektur",n:"Strahov-klosteret og biblioteket",la:50.0865,lo:14.3880,d:"Barokke bibliotekssaler med himmelmalerier. Ofte kan du bare se inn fra døråpningen, så sjekk hva som er åpent.",t:"Trikk 22/23 til Pohořelec.",u:"https://www.strahovskyklaster.cz"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Historie og arkitektur",n:"Gamlebyen og Det astronomiske uret",la:50.0875,lo:14.4213,d:"Torget med Det astronomiske uret fra 1410, Týn-kirken og Rådhuset. Uret slår hver hele time.",t:"Metro A Staroměstská.",u:"https://en.wikipedia.org/wiki/Prague_Astronomical_Clock"},
+{g:1,a:"Staré Město (gamlebyen)",c:"Historie og arkitektur",n:"Karlsbroen",la:50.0865,lo:14.4114,d:"Gotisk steinbro fra 1300-tallet med barokke statuer. Best tidlig om morgenen, før turistene kommer.",t:"Metro A Staroměstská, eller trikk til Karlovy lázně.",u:"https://en.wikipedia.org/wiki/Charles_Bridge"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Historie og arkitektur",n:"Obecní dům (Municipal House)",la:50.0875,lo:14.4283,d:"Prags mest overdådige jugendbygg fra 1912, med kafé og konserter i Smetana-salen.",t:"Metro B Náměstí Republiky.",u:"https://www.obecnidum.cz/en/"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Opera og konsert",n:"Rudolfinum",la:50.0903,lo:14.4150,d:"Neorenessansehuset der Tsjekkisk filharmoni spiller i Dvořák-salen.",t:"Metro A Staroměstská.",u:"https://www.rudolfinum.cz/en"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Opera og konsert",n:"Stavovské divadlo (Estates Theatre)",la:50.0864,lo:14.4237,d:"Teatret der Mozarts Don Giovanni ble urfremført i 1787. Opera, ballett og teater, så sjekk teksting per forestilling.",t:"Metro A/B Můstek, ca. 5 min å gå.",u:"https://www.narodni-divadlo.cz/en"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Museum",n:"Mucha-museet",la:50.0831,lo:14.4252,d:"Alfons Muchas jugendplakater og malerier. Kompakt, og lett å legge inn mellom to andre stopp.",t:"Metro A/B Můstek.",u:"https://www.mucha.cz/en"},
+{g:2,a:"Nové Město",c:"Teater",n:"Národní divadlo (Nasjonalteatret)",la:50.0807,lo:14.4132,d:"Nasjonalscenen ved Vltava, åpnet 1883, med opera, ballett og drama. Nová scéna har vært planlagt rekonstruert, så sjekk hvilke scener som spiller.",t:"Trikk 9/18/22 til Národní divadlo.",u:"https://www.narodni-divadlo.cz/en"},
+{g:2,a:"Nové Město",c:"Mat og drikke",n:"Café Louvre",la:50.0817,lo:14.4194,d:"Kaféhus fra 1902 med biljardsal i andre etasje. Kafka og Einstein skal ha vært gjester.",t:"Metro B Národní třída.",u:"https://www.cafelouvre.cz"},
+{g:2,a:"Nové Město",c:"Museum",n:"Národní muzeum (Nasjonalmuseet)",la:50.0791,lo:14.4306,d:"Hovedbygget på toppen av Václavské náměstí, restaurert og gjenåpnet i 2018. Naturhistorie, mineraler og historie i et neorenessansebygg.",t:"Metro A/C Muzeum.",u:"https://www.nm.cz/en"},
+{g:2,a:"Nové Město",c:"Opera og konsert",n:"Státní opera (Statsoperaen)",la:50.0833,lo:14.4344,d:"Neorokokko-operahus fra 1888 med klassisk operarepertoar.",t:"Metro A/C Muzeum, ca. 5 min å gå.",u:"https://www.narodni-divadlo.cz/en"},
+{g:2,a:"Nové Město",c:"Historie og arkitektur",n:"Dancing House (Tančící dům)",la:50.0755,lo:14.4143,d:"Frank Gehrys og Vlado Milunićs dekonstruktivistiske bygg fra 1996. Se det utenfra, eller ta utsikten fra terrassen øverst.",t:"Trikk 17 til Jiráskovo náměstí.",u:"https://en.wikipedia.org/wiki/Dancing_House"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Museum",n:"Nasjonalgalleriet i Veletržní palác",la:50.1031,lo:14.4318,d:"Moderne og samtidskunst i et funksjonalistisk messepalass fra 1928. Billett ca. 250 CZK.",t:"Metro C Vltavská, eller trikk 6/17 til Veletržní palác.",u:"https://www.ngprague.cz/en"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Museum",n:"Det nasjonale tekniske museet",la:50.0972,lo:14.4247,d:"Fly, biler og tog i en enorm transporthall, pluss astronomi og arkitektur.",t:"Trikk til Letenské náměstí.",u:"https://www.ntm.cz/en"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Dyr og akvarium",n:"Sea World (Mořský svět)",la:50.1086,lo:14.4328,d:"Tsjekkias største havakvarium, med over 360 arter og haibasseng. Åpent 8:30–18 på hverdager og 9–19 i helgene, voksen 440 CZK. Deler har vært stengt for modernisering, med nytt «Shark Reef» planlagt i 2026, så sjekk hva som er åpent.",t:"Metro C Nádraží Holešovice, deretter trikk til Výstaviště Holešovice (sjekk linje i appen).",u:"https://www.morsky-svet.cz"},
+{g:4,a:"Holešovice, Letná og Troja",c:"Dyr og akvarium",n:"Zoo Praha",la:50.1170,lo:14.4065,d:"Regnes som en av verdens beste zoologiske hager, med 60 hektar og over 150 anlegg. Åpent hver dag fra 9:00, og fra november til februar stenger parken 16:00. Voksen 330 CZK, 300 CZK på nett.",t:"Metro C Nádraží Holešovice, deretter buss 112 til Zoo Praha.",u:"https://www.zoopraha.cz/en"},
+{g:2,a:"Vyšehrad",c:"Historie og arkitektur",n:"Vyšehrad-festningen",la:50.0640,lo:14.4180,d:"Festning på en klippe over Vltava, med Peter og Paul-basilikaen og kirkegården der Dvořák og Smetana er gravlagt.",t:"Metro C Vyšehrad.",u:"https://www.praha-vysehrad.cz"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Torg og shopping",n:"Havelské tržiště",la:50.0834,lo:14.4222,d:"Det gamle utendørsmarkedet i gamlebyen, åpent hver dag. Frukt, krydder, håndverk og suvenirer, men prisene er turistpriser.",t:"Metro A/B Můstek, 3 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=Havelsk%C3%A9%20tr%C5%BEi%C5%A1t%C4%9B%20Praha"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Torg og shopping",n:"Na Příkopě og Celetná",la:50.0868,lo:14.4283,d:"Prags viktigste handlegater, med kjeder og kjøpesenteret Palladium. Celetná er best for suvenirer, men mange butikker selger de samme tingene.",t:"Metro B Náměstí Republiky eller A/B Můstek.",u:"https://www.google.com/maps/search/?api=1&query=Na%20P%C5%99%C3%ADkop%C4%9B%20Praha"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Utsikt og park",n:"Kampa og Lennon-muren",la:50.0855,lo:14.4093,d:"Parkøy under Karlsbroen og den fargerike Lennon-muren. Fin plass til en rolig pause.",t:"Til fots fra Karlsbroen, ca. 5 min.",u:"https://www.google.com/maps/search/?api=1&query=Lennon%20Wall%20Praha"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Historie og arkitektur",n:"Malostranské náměstí og St. Nicholas-kirken",la:50.088,lo:14.4045,d:"Barokktorget i Malá Strana med den store St. Nicholas-kirken, et av byens vakreste interiører.",t:"Trikk 12/20/22 til Malostranské náměstí.",u:"https://www.google.com/maps/search/?api=1&query=St.%20Nicholas%20Church%20Mal%C3%A1%20Strana"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Utsikt og park",n:"Petřín-høyden og utsiktstårnet",la:50.0834,lo:14.3955,d:"Park og utkikkstårn med utsikt over byen. Standseilbanen er dekket av 24/72-timers kort, ellers koster en egen billett 60 CZK.",t:"Trikk 12/20/22 til Újezd, deretter standseilbane.",u:"https://www.google.com/maps/search/?api=1&query=Pet%C5%99%C3%ADn%20lookout%20tower"},
+{g:2,a:"Nové Město",c:"Torg og shopping",n:"Václavské náměstí",la:50.081,lo:14.427,d:"Det store bulevardtorget med Nasjonalmuseet i toppen, fullt av butikker og kafeer. I adventstiden er det juletorg her og på Gamlebytorget.",t:"Metro A/C Muzeum.",u:"https://en.wikipedia.org/wiki/Wenceslas_Square"},
+{g:2,a:"Nové Město",c:"Mat og drikke",n:"U Fleků",la:50.0802,lo:14.4162,d:"Bryggeri og ølhall fra 1499 med eget mørkt øl. Turistrettet og dyrere enn vanlige puber, men historisk.",t:"Metro B Národní třída, ca. 5 min å gå.",u:"https://www.ufleku.cz"},
+{g:2,a:"Nové Město",c:"Utsikt og park",n:"Náplavka",la:50.069,lo:14.413,d:"Elvepromenaden langs Vltava med kafeer og barer i buene. På lørdager er det marked med mat og håndverk.",t:"Trikk 17 til Jiráskovo náměstí, eller til fots fra Dancing House.",u:"https://www.google.com/maps/search/?api=1&query=N%C3%A1plavka%20Praha"},
+{g:3,a:"Holešovice, Letná og Troja",c:"Utsikt og park",n:"Letná-parken",la:50.0958,lo:14.4264,d:"Park med utsikt over Vltava og gamlebyen, og ølhage. Ligger nær Veletržní palác og Det tekniske museet.",t:"Trikk til Letenské náměstí.",u:"https://www.google.com/maps/search/?api=1&query=Letn%C3%A1%20park%20Praha"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Mat og drikke",n:"Lokál Dlouhá",la:50.0905,lo:14.4263,d:"Folkelig ølhall med tsjekkisk husmannskost og tankøl. Populær, så bestill bord for to på kvelden.",t:"Metro B Náměstí Republiky, 5 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=Lok%C3%A1l%20Dlouh%C3%A1%20Praha"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Teater",n:"Nasjonalt marionetteater",la:50.0885,lo:14.4177,d:"Marionetteater i en tsjekkisk tradisjon. Passer for to uten språkkunnskaper, siden dukkene bærer forestillingen.",t:"Metro A Staroměstská, 5 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=National%20Marionette%20Theatre%20Praha"},
+{g:2,a:"Nové Město",c:"Mat og drikke",n:"Café Slavia",la:50.0807,lo:14.4139,d:"Historisk kafé ved elven, rett overfor Nasjonalteatret, med utsikt mot slottet.",t:"Trikk 9/18/22 til Národní divadlo.",u:"https://www.google.com/maps/search/?api=1&query=Caf%C3%A9%20Slavia%20Praha"},
+{g:0,a:"Nové Město",c:"Museum",n:"Kommunismemuseet (Museum of Communism)",la:50.0887,lo:14.4289,d:"Utstilling om livet i Tsjekkoslovakia under kommunismen 1948–1989: propaganda, sensur, politi, skole og hverdag. Åpent daglig 9–20, voksen 390 CZK. Mye tekst, så sett av 1,5–2 timer.",t:"Metro B Náměstí Republiky, 3 min å gå.",u:"https://www.prague.eu/en/object/places/533/museum-of-communism"},
+{g:0,a:"Staré Město (gamlebyen)",c:"Museum",n:"Tortur-museet (Museum of Medieval Torture Instruments)",la:50.0873,lo:14.4233,d:"Middelalderske torturredskaper i gamle kjellere i Celetná 12. Åpent daglig 10–20. Inngangen var ca. 160 CZK i eldre kilder, så sjekk prisen. Tar ca. 45–60 minutter.",t:"Til fots fra Gamlebytorget, ca. 5 min, eller metro A/B Můstek.",u:"https://www.google.com/maps/search/?api=1&query=Museum%20of%20Medieval%20Torture%20Instruments%20Celetn%C3%A1%2012%20Praha"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Museum",n:"Franz Kafka-museet",la:50.0867,lo:14.4113,d:"Utstilling om Kafkas liv og Praha i hans tid, med førsteutgaver, brev og dagbøker, ved elven rett ved Karlsbroen. Åpent daglig 10–18, voksen 300 CZK. Tar 1–2 timer.",t:"Til fots fra Karlsbroen, ca. 5 min.",u:"https://kafkamuseum.cz/en"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Aktivitet",n:"Speillabyrinten på Petřín",la:50.0831,lo:14.3961,d:"Speilgang i en liten trepaviljong fra 1891, ved siden av utkikkstårnet. Åpent 10–18 om vinteren. Kombibillett Petřín (labyrint, tårn og observatorium) koster 340 CZK for voksne og gjelder i ett år. Standseilbanen og tårnet har hatt stengte perioder, så sjekk status.",t:"Trikk 12/20/22 til Újezd, deretter standseilbane, eller gå opp.",u:"https://prague.eu/en/objevujte/mirror-maze/"},
+{g:1,a:"Pražský hrad og Malá Strana",c:"Aktivitet",n:"Štefánik-observatoriet",la:50.081,lo:14.3962,d:"Folkeobservatorium i Petřín-parken siden 1928, med sol på dagtid og planeter og Månen på kvelden når været tillater det. Inngang 120 CZK, og det inngår i Petřín-kombibilletten. Sjekk åpningstider og kveldsprogram, siden de varierer med sesong og vær.",t:"Samme vei som til speillabyrinten og tårnet på Petřín.",u:"https://prague.eu/en/objevujte/stefanik-observatory-stefanikova-hvezdarna/"},
+{g:1,a:"Øl og smaking",c:"Bryggeri og smaking",n:"Strahov klosterbryggeri",la:50.0867,lo:14.389,d:"Klosterbryggeri ved Strahov-klosteret. Det er brygget øl her i over 600 år, og tradisjonen ble gjenopplivet i 2001. Prøv St. Norbert-ølene med utsikt over byen. Turarrangører oppgir ca. 60 CZK for små glass, så sjekk prisen.",t:"Trikk 22/23 til Pohořelec, kort gange.",u:"https://www.google.com/maps/search/?api=1&query=Strahov%20Monastery%20Brewery%20Praha"},
+{g:1,a:"Øl og smaking",c:"Bryggeri og smaking",n:"Břevnov klosterbryggeri",la:50.0847,lo:14.3693,d:"Bryggeri ved Břevnov-klosteret, grunnlagt i 993 og regnet som Böhmens eldste mannskloster. Kjent for ølprøver og en vakker barokk kirke. Passer sammen med Strahov.",t:"Trikk 22 til Břevnovský klášter.",u:"https://www.google.com/maps/search/?api=1&query=B%C5%99evnov%20Monastery%20Brewery%20Praha"},
+{g:2,a:"Øl og smaking",c:"Bryggeri og smaking",n:"Staropramen-bryggeriet",la:50.0698,lo:14.4035,d:"Pragas største bryggeri i Smíchov. Omvisning med lydguide om historien siden 1869, og smaking av fire øl i bryggeristuen til slutt. Turguider oppgir fra ca. 12,50 euro per person, så sjekk og bestill på nett.",t:"Metro B Anděl, kort gange.",u:"https://www.google.com/maps/search/?api=1&query=Staropramen%20Brewery%20Praha"},
+{g:2,a:"Øl og smaking",c:"Bryggeri og smaking",n:"Pivovarský dům",la:50.0757,lo:14.4207,d:"Mikrobryggeri og restaurant i Nové Město med egne øl, også smaksatte varianter, og tsjekkisk mat. Greit for en ølsmaking uten omvisning. Bestill bord på kvelden.",t:"Metro B Karlovo náměstí, 5 min å gå.",u:"https://www.google.com/maps/search/?api=1&query=Pivovarsk%C3%BD%20d%C5%AFm%20Praha"}
+];
+
+var TM={0:"ca. 25 min (metro A + trikk 22)",1:"ca. 30 min (metro A + trikk 22)",2:"ca. 8 min til fots",3:"ca. 15 min (metro A + gange)",4:"ca. 8 min til fots",5:"ca. 8 min (metro A)",6:"ca. 5 min til fots",7:"ca. 5 min til fots",8:"ca. 8 min (metro B)",9:"ca. 8 min (metro B)",10:"ca. 5 min (metro A)",11:"ca. 8 min (metro A + gange)",12:"ca. 25 min (trikk 17 eller gange)",13:"ca. 25 min (metro A/C + trikk 6/17)",14:"ca. 25 min (metro + trikk)",15:"ca. 30 min (metro C + trikk)",16:"ca. 45 min (metro C + buss 112)",17:"ca. 18 min (metro A → C)",18:"ca. 3 min til fots",19:"ca. 3 min til fots",20:"ca. 20 min (metro A + gange)",21:"ca. 15 min (metro A + gange)",22:"ca. 25 min (trikk + standseilbane)",23:"ca. 3 min til fots",24:"ca. 12 min (metro B + gange)",25:"ca. 20 min (metro B + trikk 17)",26:"ca. 20 min (metro + trikk)",27:"ca. 12 min (metro B + gange)",28:"ca. 12 min (metro A + gange)",29:"ca. 8 min (trikk 9/18/22)",30:"ca. 8 min til fots",31:"ca. 5 min til fots",32:"ca. 20 min (metro A + gange)",33:"ca. 30 min (trikk + standseilbane)",34:"ca. 30 min (trikk + standseilbane)",35:"ca. 30 min (metro A + trikk 22)",36:"ca. 30 min (metro A + trikk 22)",37:"ca. 15 min (metro B Anděl)",38:"ca. 10 min (metro B)"};
+var C={"Opera og konsert":"#8c1d3f","Bryggeri og smaking":"#9a3412","Aktivitet":"#b0306b","Teater":"#5b3a91","Museum":"#0f6b6b","Dyr og akvarium":"#2e7d32","Historie og arkitektur":"#a0701a","Torg og shopping":"#a85a0f","Utsikt og park":"#3d7a99","Mat og drikke":"#5c6670"};
+var S={a:new Set(),b:new Set()},cat=null,who=null,day=null,msg="";
+try{["a","b"].forEach(function(k){S[k]=new Set(JSON.parse(localStorage.getItem(KEY+k)||"[]"))})}catch(e){}
+function save(){try{["a","b"].forEach(function(k){localStorage.setItem(KEY+k,JSON.stringify(Array.from(S[k])))})}catch(e){}}
+function code(){return "a="+Array.from(S.a).join(".")+"&b="+Array.from(S.b).join(".")}
+function applyCode(t){var ok=false;(t||"").trim().split("&").forEach(function(p){var kv=p.split("=");if((kv[0]==="a"||kv[0]==="b")&&/^[0-9.]*$/.test(kv[1]||"")){S[kv[0]]=new Set(kv[1]?kv[1].split(".").map(Number).filter(function(n){return n>=0&&n<P.length}):[]);ok=true}});if(ok)save();return ok}
+var map=L.map("map").setView(CENTER,12);
+var osm=L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; <a href='https://www.openstreetmap.org/copyright' target='_blank' rel='noopener'>OpenStreetMap</a>"}).addTo(map);
+var sat=L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:18,maxZoom:19,attribution:"Tiles &copy; Esri, Maxar, Earthstar Geographics"});
+L.control.layers({"Kart":osm,"Satellitt":sat},null,{collapsed:false,position:"topright"}).addTo(map);
+var mk=P.map(function(p){
+ return L.circleMarker([p.la,p.lo],{radius:9,color:"#fff",weight:2,fillColor:C[p.c],fillOpacity:1})
+  .bindPopup("<b>"+p.n+"</b><br>"+p.c+"<br><a href='"+p.u+"' target='_blank' rel='noopener'>Nettside</a>").bindTooltip(p.n);
+});
+function visible(i){return (!cat||P[i].c===cat)&&(who===null||(who==="ab"?(S.a.has(i)&&S.b.has(i)):S[who].has(i)))&&(day===null||P[i].g===day)}
+function render(){
+ var h="<div class='lbl'>Dag</div><button class='chip' data-day='' aria-pressed='"+(day===null)+"'>Alle</button>";
+ D.forEach(function(d,k){h+="<button class='chip' data-day='"+k+"' aria-pressed='"+(day===k)+"'>"+d.s+"</button>"});
+ h+="<div class='lbl'>Kategori</div><button class='chip' data-cat='' aria-pressed='"+(!cat)+"'>Alle</button>";
+ Object.keys(C).forEach(function(k){h+="<button class='chip' data-cat='"+k+"' aria-pressed='"+(cat===k)+"'>"+k+"</button>"});
+ h+="<div class='lbl'>Valg</div><button class='chip' data-who='' aria-pressed='"+(who===null)+"'>Alle</button><button class='chip' data-who='ab' aria-pressed='"+(who==="ab")+"'>Begge er interessert</button><button class='chip' data-who='a' aria-pressed='"+(who==="a")+"'>Tony ("+S.a.size+")</button><button class='chip' data-who='b' aria-pressed='"+(who==="b")+"'>Dimitar ("+S.b.size+")</button><div class='lbl'>Delingskode (kopier og send til hverandre)</div><div class='share'><input id='mycode' readonly value='"+code()+"'><input id='pastecode' placeholder='Lim inn kode her'><button class='chip' data-apply='1'>Bruk kode</button>"+(msg?"<span class='both'>"+msg+"</span>":"")+"</div>";
+ document.getElementById("bar").innerHTML=h;
+ var info=day!==null?"<div class='dayinfo'><h2>"+D[day].t+"</h2><p>"+D[day].d+"</p></div>":"";
+ var out="",any=false,pts=[];
+ Object.keys(A).forEach(function(area){
+  var cards="";
+  P.forEach(function(p,i){
+   if(p.a!==area)return;
+   if(!visible(i)){map.removeLayer(mk[i]);return}
+   mk[i].addTo(map);pts.push([p.la,p.lo]);any=true;
+   var a=S.a.has(i),b=S.b.has(i);
+   cards+="<div class='card' style='--c:"+C[p.c]+"'><div class='cat'>"+p.c+(a&&b?"<span class='both'>Begge er interessert</span>":"")+"</div><h3><a href='"+p.u+"' target='_blank' rel='noopener'>"+p.n+"</a></h3><p>"+p.d+"</p><p class='how'>Slik kommer du deg dit: "+p.t+(TM[i]?" Reisetid fra Můstek: "+TM[i]+".":"")+" <a href='https://www.google.com/maps/dir/?api=1&destination="+p.la+","+p.lo+"&travelmode=transit' target='_blank' rel='noopener'>Kollektivrute fra der du er</a></p><div class='acts'><button data-show='"+i+"'>Vis på kart</button><a class='g3d' href='https://www.google.com/maps/@"+p.la+","+p.lo+",250a,35y,0h,60t/data=!3m1!1e3' target='_blank' rel='noopener'>3D i Google Maps</a><button class='v1' data-pick='a:"+i+"' aria-pressed='"+a+"'>Tony</button><button class='v2' data-pick='b:"+i+"' aria-pressed='"+b+"'>Dimitar</button></div></div>";
+  });
+  if(cards)out+="<h2>"+area+"</h2><p class='area-note'>"+A[area]+"</p>"+cards;
+ });
+ document.getElementById("list").innerHTML=info+(any?out:"<p class='empty'>Ingen steder matcher filteret ennå.</p>");
+ if(pts.length)map.fitBounds(pts,{padding:[30,30],maxZoom:14});
+}
+document.addEventListener("click",function(e){
+ var b=e.target.closest("button");if(!b)return;
+ if(b.hasAttribute("data-day")){var v=b.getAttribute("data-day");day=v===""?null:+v;render()}
+ else if(b.hasAttribute("data-cat")){cat=b.getAttribute("data-cat")||null;render()}
+ else if(b.hasAttribute("data-who")){who=b.getAttribute("data-who")||null;render()}
+ else if(b.hasAttribute("data-apply")){var t=document.getElementById("pastecode").value;msg=applyCode(t)?"Valg oppdatert":"Ugyldig kode";render()}
+ else if(b.hasAttribute("data-pick")){var kv=b.getAttribute("data-pick").split(":"),s=S[kv[0]],i=+kv[1];s.has(i)?s.delete(i):s.add(i);save();render()}
+ else if(b.hasAttribute("data-show")){var j=+b.getAttribute("data-show");map.setView([P[j].la,P[j].lo],15);mk[j].openPopup();window.scrollTo({top:0,behavior:"smooth"})}
+});
+render();
+setTimeout(function(){map.invalidateSize()},200);
+
+</script>
+</body>
+</html>
